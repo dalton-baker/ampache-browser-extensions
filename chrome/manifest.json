@@ -1,7 +1,7 @@
 {
     "name": "Ampache Media Keys",
-    "description": "When  activated, this extension will let you control Ampache with your keyboard media keys",
-    "version": "1.0",
+    "description": "When activated, this extension will let you control Ampache with your keyboard's media keys.",
+    "version": "0.02",
     "manifest_version": 3,
     "background": {
         "service_worker": "background.js"
@@ -14,7 +14,7 @@
             "48": "/images/logo_48.png",
             "128": "/images/logo_128.png"
         },
-        "default_title": "Click this while in an Ampache tab to activate media keys"
+        "default_title": "Click this while in an Ampache tab to activate"
     },
     "icons": {
         "16": "/images/logo_16.png",
@@ -44,6 +44,13 @@
             },
             "global": true,
             "description": "Play previous track"
+        },
+        "stop": {
+            "suggested_key": {
+                "default": "MediaStop"
+            },
+            "global": true,
+            "description": "Stop media playback"
         }
     }
 }

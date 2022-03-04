@@ -6,7 +6,6 @@ function playPause() {
         return;
     }
 
-
     var pauseButton = document.getElementsByClassName("jp-pause").item(0);
 
     if (pauseButton != null && pauseButton.style.display != "none") {
@@ -31,9 +30,15 @@ function playPrev() {
     }
 }
 
-function storageChanged(changes, area) {
-    console.log("changes: " + JSON.stringify(changes));
+function stop() {
+    var prevButton = document.getElementsByClassName("jp-stop").item(0);
 
+    if (prevButton != null) {
+        prevButton.click();
+    }
+}
+
+function storageChanged(changes, area) {
     if (area === 'local' && changes.activeTabId != null && changes.activeTabId.newValue != null) {
         if (changes.activeTabId.newValue != -1) {
             chrome.action.setBadgeText({ text: 'ON' });
@@ -44,20 +49,28 @@ function storageChanged(changes, area) {
     }
 }
 
+function activateExtension(tab) {
+    chrome.action.setTitle({
+        title: "Controlling " + (new URL(tab.url).hostname)
+    });
+    chrome.storage.local.set({ activeTabId: tab.id });
+}
+
+function deactivateExtension() {
+    chrome.action.setTitle({
+        title: 'Click this while in an Ampache tab to activate'
+    });
+    chrome.storage.local.set({ activeTabId: -1 });
+}
+
 function extensionClicked(tab) {
-    console.log('tab: ' + JSON.stringify(tab));
+    //console.log('tab: ' + JSON.stringify(tab));
 
     chrome.storage.local.get('activeTabId', result => {
         if (result.activeTabId != -1) {
-            chrome.action.setTitle({
-                title: 'Click this while in an Ampache tab to use this extension'
-            });
-            chrome.storage.local.set({ activeTabId: -1 });
+            deactivateExtension();
         } else {
-            chrome.action.setTitle({
-                title: "Observing " + (new URL(tab.url).hostname)
-            });
-            chrome.storage.local.set({ activeTabId: tab.id });
+            activateExtension(tab);
         }
     });
 }
@@ -67,6 +80,8 @@ function extensionStarted() {
 }
 
 function commandFired(command) {
+    console.log("command recieved: " + command);
+
     chrome.storage.local.get('activeTabId', result => {
         if (result.activeTabId == -1) {
             return;
@@ -89,6 +104,12 @@ function commandFired(command) {
                 chrome.scripting.executeScript({
                     target: { tabId: result.activeTabId },
                     function: playPause
+                });
+                break;
+            case "stop":
+                chrome.scripting.executeScript({
+                    target: { tabId: result.activeTabId },
+                    function: stop
                 });
                 break;
         }
